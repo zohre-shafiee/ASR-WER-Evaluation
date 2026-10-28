@@ -1,0 +1,10 @@
+__pycache__/
+.venv/
+.ipynb_checkpoints/
+*.wav
+*.mp3
+*.m4a
+*_transcr_manuelle.txt
+*_tadddam.txt
+participants/
+private_data/
