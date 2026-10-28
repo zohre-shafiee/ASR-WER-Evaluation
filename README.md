@@ -12,7 +12,7 @@ Quatre personnes ont réalisé une même tâche de description orale d'une image
 
 La mesure WER correspond à `(substitutions + suppressions + insertions) / nombre de mots de la référence`.
 
-## Résultats du projet universitaire
+## Résultats
 
 Les résultats récapitulés dans le document de projet se situent entre **9,96 % et 19,41 % de WER** sur les quatre productions analysées. L'échantillon est réduit ; les différences observées ne permettent pas de conclure à un effet général du statut natif/non natif ou de l'accent.
 
