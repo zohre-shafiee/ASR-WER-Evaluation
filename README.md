@@ -1,44 +1,172 @@
-# Évaluation d'un système de reconnaissance automatique de la parole (ASR)
+# Automatic Speech Recognition (ASR) Evaluation — Word Error Rate
 
-Projet universitaire réalisé en équipe dans le cadre du cours *Méthodes d’expérimentation en TAL* (Université Grenoble Alpes).
+**University group project · NLP / Speech Technology · Python · JiWER**
 
-## Objectif
+## Project overview
 
-Évaluer les transcriptions produites par le système ASR **Tadddam**, en les comparant à des transcriptions manuelles de référence, à l'aide du **Word Error Rate (WER)**.
+This project examines the quality of **automatic speech recognition (ASR)** by comparing machine-generated transcripts with manually produced reference transcripts.
 
-## Méthode
+The university experiment used the **Tadddam** transcription system. This public repository provides a **privacy-safe reproduction of the evaluation workflow**: a reusable WER calculator and entirely fictional sample transcripts. It does not contain original recordings or participant transcripts.
 
-Quatre personnes ont réalisé une même tâche de description orale d'une image en français, dans des conditions d'enregistrement comparables. Le protocole comprenait des personnes francophones natives et non natives. Pour chaque production, les transcriptions automatiques ont été comparées aux références manuelles après la mise en minuscules, la suppression de la ponctuation et la normalisation des espaces.
+## Research question and protocol
 
-La mesure WER correspond à `(substitutions + suppressions + insertions) / nombre de mots de la référence`.
+How accurately does an ASR system transcribe spoken French under a controlled description task?
 
-## Résultats
+For the course experiment:
+- Four speakers described the same picture in French.
+- The group included both native and non-native speakers of French.
+- The recording task and conditions were designed to be comparable.
+- Automatic transcripts were compared against manual reference transcripts.
+- Word-level recognition errors were quantified with the **Word Error Rate (WER)**.
 
-Les résultats récapitulés dans le document de projet se situent entre **9,96 % et 19,41 % de WER** sur les quatre productions analysées. L'échantillon est réduit ; les différences observées ne permettent pas de conclure à un effet général du statut natif/non natif ou de l'accent.
+The small sample supports **exploratory observations only**: it cannot establish a general effect of accent or native-language background.
 
-## Reproduction avec des données fictives
+## Evaluation workflow
 
-**Important : les deux exemples fournis ici sont inventés.** Ils servent uniquement à démontrer le calcul ; ce ne sont pas des données recueillies auprès des participantes.
+```text
+Spoken description of an image
+              |
+              v
+        ASR transcription
+              |
+              +--------------------+
+              |                    |
+              v                    v
+      ASR hypothesis        Manual reference
+              |                    |
+              +---------+----------+
+                        |
+                        v
+          Text normalization
+       lowercase / punctuation /
+         whitespace cleanup
+                        |
+                        v
+           Word-level alignment
+                  JiWER
+                        |
+                        v
+       Substitutions · Deletions
+             · Insertions
+                        |
+                        v
+           Word Error Rate (WER)
+```
+
+## Metric
+
+The WER formula is:
+
+```text
+WER = (S + D + I) / N
+```
+
+Where:
+
+- **S** — substitutions: a reference word is transcribed as a different word;
+- **D** — deletions: a reference word is omitted;
+- **I** — insertions: a word is added to the hypothesis;
+- **N** — number of words in the reference transcript.
+
+For instance, if an invented reference has 17 words and the ASR hypothesis contains one substitution and one deletion, WER is `(1 + 1 + 0) / 17 = 11.76%`.
+
+**A lower WER means fewer word-level recognition errors.** This metric does not on its own capture meaning, downstream usability or all characteristics of fluent speech.
+
+## Implementation
+
+The public `calcul_wer.py` script:
+
+1. Accepts the reference and ASR hypothesis as two UTF-8 text files;
+2. Lowercases both transcripts;
+3. Replaces punctuation with whitespace and normalizes spaces;
+4. Uses JiWER `process_words()` for word-level alignment;
+5. Prints WER, substitutions, deletions and insertions.
+
+The script also checks that the normalized reference is not empty.
+
+## Repository structure
+
+```text
+.
+├── calcul_wer.py
+├── requirements.txt
+├── test_wer.py
+├── examples/
+│   ├── reference.txt
+│   └── hypothese_asr.txt
+├── .github/
+│   └── workflows/
+│       └── test.yml
+└── .gitignore
+```
+
+## Reproduce with fictional data
+
+Install the dependencies:
 
 ```bash
 python -m pip install -r requirements.txt
+```
+
+Run the public evaluation example:
+
+```bash
 python calcul_wer.py examples/reference.txt examples/hypothese_asr.txt
 ```
 
-Le script affiche le WER et le nombre de substitutions, suppressions et insertions.
+The expected example result is:
+
+```text
+WER : 11.76 %
+Substitutions : 1
+Suppressions : 1
+Insertions : 0
+```
+
+These are **invented example texts**, not student or participant data.
+
+## Automated tests
+
+The repository includes `test_wer.py`, which checks text normalization and expected counts on the fictional example.
+
+```bash
+python -m unittest discover -v
+```
+
+A GitHub Actions workflow is also configured to install dependencies and run the tests. The presence of the workflow does not guarantee every remote run has passed; check the repository's **Actions** tab for its current status.
+
+## Experiment results
+
+In the original course project, the WERs of the four analyzed productions ranged from **9.96% to 19.41%**.
+
+These aggregate figures are included only as a summary of the university report. With four productions, differences should not be interpreted as statistically representative.
 
 ## Technologies
 
-Python, [JiWER](https://github.com/jitsi/jiwer), reconnaissance automatique de la parole, évaluation des transcriptions.
+- Python 3
+- JiWER
+- Speech recognition evaluation
+- Text normalization and word-level error analysis
+- GitHub Actions / `unittest`
 
-## Éthique et confidentialité
+## Privacy and ethics
 
-La collecte initiale était destinée à un usage pédagogique. **Les enregistrements, les transcriptions réelles, les noms, les pseudonymes des participantes et la correspondance avec leurs résultats individuels ne sont pas publiés.** Le script public reprend la méthode de calcul du WER et les fichiers d'entrée sont fictifs.
+The original recordings and transcriptions were collected for university coursework. This public version deliberately **does not publish**:
 
-## Limites
+- the original audio;
+- individual participant identities;
+- actual reference or ASR transcripts;
+- links between individual results and specific participants.
 
-Échantillon de quatre productions, contexte expérimental limité, influence possible du débit, des hésitations ou des caractéristiques du système ASR. Les résultats sont exploratoires.
+Only a generic methodology, aggregate range and invented example are made public.
 
-## Crédits
+## Limitations
 
-Travail de groupe réalisé dans un cadre universitaire. Cette version publique présente uniquement la méthode de calcul du WER, sans prétendre représenter l'intégralité des contributions individuelles du groupe.
+- WER depends on transcription and preprocessing conventions.
+- Punctuation is stripped; this evaluation does not separately score punctuation quality.
+- The sample of four speakers is too small for broad population conclusions.
+- The public repository reproduces the **evaluation metric**, not the original Tadddam speech recognition model or the entire experimental setup.
+
+## Credits
+
+This was a **group university project** in *Méthodes d’expérimentation en TAL* at Université Grenoble Alpes. The public code illustrates the WER calculation without claiming sole authorship of the overall experiment.
